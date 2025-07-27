@@ -581,6 +581,7 @@
             studentAccessGranted: sessionStorage.getItem('studentAccessGranted') === 'true',
             studentSchool: sessionStorage.getItem('studentSchool') || null,
             dataFetched: false,
+            adminListenerAttached: false,
             currentUserId: null,
             allAccessCodes: [],
             allMaterials: [],
@@ -612,6 +613,7 @@
                 DOMElements.currentUserId.textContent = user.email || user.uid;
                 DOMElements.adminPanel.style.display = 'block';
                 DOMElements.categoriesSection.style.display = 'block';
+                initializeAdminListeners();
                 fetchLinksAndCodes();
             } else if (AppState.studentAccessGranted) {
                 DOMElements.logoutBtn.style.display = 'block';
@@ -707,7 +709,6 @@
 
         const fetchLinksAndCodes = () => {
             if (AppState.dataFetched) {
-                if(AppState.isAdmin) renderAccessCodeList();
                 return;
             };
 
@@ -751,7 +752,9 @@
             return `${districtPrefix}-${schoolWords}-${randomChars}`;
         };
 
-        const initializeAccessCodes = () => {
+        const initializeAdminListeners = () => {
+            if (AppState.adminListenerAttached) return;
+
             const accessCodesRef = ref(db, `artifacts/${APP_ID}/accessCodes`);
             onValue(accessCodesRef, (snapshot) => {
                 const codes = [];
@@ -765,6 +768,7 @@
                     renderAccessCodeList();
                 }
             });
+            AppState.adminListenerAttached = true;
         };
 
         const initializeVisitorStats = () => {
@@ -798,7 +802,6 @@
         document.addEventListener("DOMContentLoaded", () => {
             DOMElements.currentYear.textContent = new Date().getFullYear();
             
-            initializeAccessCodes();
             initializeVisitorStats();
             
             onAuthStateChanged(auth, (user) => {
@@ -835,10 +838,20 @@
             updateUI(); 
         });
 
-        DOMElements.studentLoginForm.addEventListener('submit', (e) => {
+        DOMElements.studentLoginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const enteredCode = DOMElements.accessCodeInput.value.trim();
-            const validCode = AppState.allAccessCodes.find(c => c.code === enteredCode);
+            const accessCodesRef = ref(db, `artifacts/${APP_ID}/accessCodes`);
+            const snapshot = await get(accessCodesRef);
+            let validCode = null;
+            if(snapshot.exists()){
+                snapshot.forEach(child => {
+                    const codeData = child.val();
+                    if(codeData.code === enteredCode) {
+                        validCode = codeData;
+                    }
+                });
+            }
 
             if (validCode) {
                 sessionStorage.setItem('studentAccessGranted', 'true');
