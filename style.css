@@ -1,28 +1,36 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap');
 
 :root {
-    --primary-color: #0052D4; 
-    --secondary-color: #65C7F7;
-    --accent-color: #9CECFB;
-    --danger-color: #e74c3c; 
-    --success-color: #2ecc71;
-    --light-color: #ffffff; 
-    --dark-color: #2c3e50;
-    --text-color: #34495e;
-    --text-muted: #7f8c8d;
-    --bg-light: #f4f7f9;
-    --border-color: #e0e6ed;
-    --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 10px 15px rgba(0, 0, 0, 0.08);
-    --shadow-lg: 0 20px 25px rgba(0, 0, 0, 0.1);
-    --border-radius-md: 12px;
-    --border-radius-lg: 16px;
-    --transition-speed: 0.3s ease;
+    --primary-color: #007BFF;
+    --primary-color-dark: #0056b3;
+    --secondary-color: #6c757d;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --light-color: #f8f9fa;
+    --dark-color: #343a40;
+    
+    --bg-color: #f4f7f9;
+    --surface-color: #ffffff;
+    --text-color: #212529;
+    --text-muted: #6c757d;
+    --border-color: #dee2e6;
+
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --shadow-sm: 0 2px 4px var(--shadow-color);
+    --shadow-md: 0 4px 8px var(--shadow-color);
+    --shadow-lg: 0 10px 20px var(--shadow-color);
+    
+    --border-radius: 12px;
+    --transition-speed: 0.2s ease-in-out;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
 }
 
 body {
     margin: 0; 
-    background: linear-gradient(135deg, var(--bg-light), #e9f1f5);
+    background-color: var(--bg-color);
     color: var(--text-color); 
     line-height: 1.6; 
     font-family: 'Open Sans', sans-serif; 
