@@ -1,13 +1,375 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IGACOS LR PORTAL</title>
-    <link rel="stylesheet" href="style.css" />
-    <script type="module" src="script.js"></script>
-  </head>
-  <body>
-    <lr-portal-app></lr-portal-app>
-  </body>
+    <style>
+        /* GLOBAL THEME AND FONTS */
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap');
+
+        :root {
+            --primary-color: #007BFF;
+            --primary-color-dark: #0056b3;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            
+            --bg-color: #f4f7f9;
+            --surface-color: #ffffff;
+            --text-color: #212529;
+            --text-muted: #6c757d;
+            --border-color: #dee2e6;
+
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --shadow-sm: 0 2px 4px var(--shadow-color);
+            --shadow-md: 0 4px 8px var(--shadow-color);
+            --shadow-lg: 0 10px 20px var(--shadow-color);
+            
+            --border-radius: 12px;
+            --transition-speed: 0.2s ease-in-out;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0; 
+            background-color: var(--bg-color);
+            color: var(--text-color); 
+            line-height: 1.6; 
+            font-family: 'Open Sans', sans-serif; 
+            -webkit-font-smoothing: antialiased; 
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* LAYOUT & COMPONENT STYLES */
+        h1, h2, h3, .logo { font-family: 'Montserrat', sans-serif; font-weight: 700; }
+        h2 { color: var(--dark-color); font-size: 2em; text-align: center; margin-bottom: 40px; }
+        main { padding: 30px 5%; max-width: 1200px; margin: 0 auto; }
+        .content-section { background-color: var(--surface-color); padding: 30px; border-radius: var(--border-radius); box-shadow: var(--shadow-md); margin-bottom: 30px; }
+
+        .header {
+          background: rgba(255, 255, 255, 0.8);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          border-bottom: 1px solid var(--border-color);
+          padding: 12px 5%;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          position: sticky;
+          top: 0;
+          z-index: 1000;
+        }
+        .header-controls { display: flex; align-items: center; gap: 15px; }
+        .logo { font-size: 1.5em; color: var(--primary-color); cursor: pointer; }
+        .logo span { color: var(--secondary-color); font-weight: 400; }
+        .user-id-display { font-size: 0.9em; color: var(--text-muted); background: var(--bg-color); padding: 8px 15px; border-radius: 20px; }
+        .user-id-display span { font-weight: 600; color: var(--dark-color); }
+        .logout-btn { background: var(--danger-color); color: white; border: none; padding: 10px 20px; border-radius: 50px; cursor: pointer; font-weight: 600; transition: all var(--transition-speed); }
+        .logout-btn:hover { background: #c82333; box-shadow: var(--shadow-sm); transform: translateY(-2px); }
+
+        .landing-page { text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; background: transparent; box-shadow: none; padding: 60px 20px;}
+        .landing-page h1 { font-size: clamp(2.5em, 5vw, 4em); color: var(--dark-color); margin-bottom: 0; }
+        .landing-page p { font-size: clamp(1em, 2vw, 1.25em); max-width: 600px; color: var(--text-muted); margin-top: 10px; }
+        .landing-actions { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; margin-top: 30px;}
+        .landing-btn { padding: 15px 35px; border: none; border-radius: 50px; cursor: pointer; font-size: 1.1em; font-weight: 600; color: white; transition: all var(--transition-speed); box-shadow: var(--shadow-md); }
+        .landing-btn:hover { transform: translateY(-3px) scale(1.05); box-shadow: var(--shadow-lg); }
+        .landing-btn.student { background: var(--success-color); }
+        .landing-btn.admin { background: var(--primary-color); }
+        
+        .auth-section { text-align: center; max-width: 480px; margin: 40px auto; }
+        .auth-form { display: flex; flex-direction: column; gap: 15px; }
+        .form-input { padding: 14px 20px; border: 1px solid var(--border-color); border-radius: var(--border-radius); font-size: 1em; transition: all var(--transition-speed); background: var(--bg-color); }
+        .form-input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.25); }
+        .form-button { padding: 14px 20px; border: none; border-radius: var(--border-radius); cursor: pointer; font-size: 1em; font-weight: 600; color: white; transition: all var(--transition-speed); box-shadow: var(--shadow-sm); background: var(--primary-color); }
+        .form-button:hover { background: var(--primary-color-dark); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+        
+        .admin-panel-grid { display: grid; grid-template-columns: 1fr; gap: 30px; }
+        .admin-form-section { border-left: 4px solid var(--primary-color); }
+        .admin-form-section h3 { color: var(--dark-color); margin: 0 0 20px 0; padding-bottom: 10px; border-bottom: 1px solid var(--border-color); font-size: 1.4em; text-align: left;}
+        .add-material-form { display: flex; flex-direction: column; gap: 1rem; }
+        
+        .search-container { display: flex; justify-content: center; margin-bottom: 30px; }
+        .search-container input { width: 100%; max-width: 600px; border-radius: 50px; padding: 12px 25px; }
+        .materials-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
+        .material-card { background-color: var(--surface-color); border-radius: var(--border-radius); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; transition: all var(--transition-speed); }
+        .material-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); }
+        .material-title { color: var(--dark-color); text-decoration: none; font-size: 1.2em; font-weight: 600; font-family: 'Montserrat', sans-serif; flex-grow: 1; padding: 20px 20px 15px 20px; }
+        .material-title:hover { color: var(--primary-color); }
+        .card-footer { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-top: 1px solid var(--border-color); background-color: #fafafa; border-bottom-left-radius: var(--border-radius); border-bottom-right-radius: var(--border-radius); }
+        .grade-badge { background-color: var(--primary-color); color: var(--light-color); padding: 4px 12px; border-radius: 50px; font-size: 0.8em; font-weight: 600; }
+        .delete-link-btn { background: transparent; border: none; cursor: pointer; padding: 5px; opacity: 0.6; transition: all var(--transition-speed); }
+        .delete-link-btn:hover { opacity: 1; transform: scale(1.1); background-color: #e9ecef; border-radius: 50%;}
+        .delete-link-btn svg { width: 20px; height: 20px; fill: var(--danger-color); }
+        .empty-state { text-align: center; grid-column: 1 / -1; color: var(--text-muted); padding: 40px; }
+        
+        .footer { background-color: var(--dark-color); color: var(--light-color); text-align: center; padding: 20px 0; margin-top: 40px; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+
+    <header class="header" id="header" style="display: none;">
+        <div class="logo" id="mainLogo">IGACOS <span>LR PORTAL</span></div>
+        <div class="header-controls">
+            <div class="user-id-display" id="currentUserIdContainer" style="display: none;">
+                Logged in as: <span id="currentUserId"></span>
+            </div>
+            <button id="logoutBtn" class="logout-btn">Logout</button>
+        </div>
+    </header>
+
+    <main>
+        <section id="landingPage" class="content-section landing-page">
+            <h1>IGACOS LR PORTAL</h1>
+            <p>Your central hub for the Division of the Island Garden City of Samal's learning resources.</p>
+            <div class="landing-actions">
+                <button id="landingStudentBtn" class="landing-btn student">Login as Student</button>
+                <button id="landingAdminBtn" class="landing-btn admin">Login as Admin</button>
+            </div>
+        </section>
+
+        <section id="studentAuthSection" class="content-section auth-section" style="display: none;">
+            <h2>Student Access</h2>
+            <form id="studentLoginForm" class="auth-form">
+                <input type="password" id="accessCodeInput" class="form-input" placeholder="Enter Site Access Code" required />
+                <button type="submit" class="form-button">Unlock Content</button>
+            </form>
+        </section>
+
+        <section id="adminAuthSection" class="content-section auth-section" style="display: none;">
+            <h2>Admin Login</h2>
+            <form id="adminLoginForm" class="auth-form">
+                <input type="email" id="adminLoginEmail" class="form-input" placeholder="Email" required />
+                <input type="password" id="adminLoginPassword" class="form-input" placeholder="Password" required />
+                <button type="submit" class="form-button">Login as Admin</button>
+            </form>
+        </section>
+
+        <section id="adminPanel" class="content-section" style="display: none;">
+            <h2>Admin Dashboard</h2>
+            <div class="admin-panel-grid">
+                <div class="admin-form-section">
+                    <h3>Add New Educational Material</h3>
+                    <form id="addLinkForm" class="add-material-form">
+                        <input name="fileLink" type="text" class="form-input" placeholder="Paste Download Link Here" required />
+                        <input name="linkDescription" type="text" class="form-input" placeholder="Description (e.g., 'Math Worksheet')" required />
+                        <select name="gradeLevel" class="form-input" required>
+                            <option value="">Select Grade Level</option>
+                            <option value="grade1">Grade 1</option><option value="grade2">Grade 2</option><option value="grade3">Grade 3</option>
+                            <option value="grade4">Grade 4</option><option value="grade5">Grade 5</option><option value="grade6">Grade 6</option>
+                            <option value="grade7">Grade 7</option><option value="grade8">Grade 8</option><option value="grade9">Grade 9</option>
+                            <option value="grade10">Grade 10</option><option value="grade11">Grade 11</option><option value="grade12">Grade 12</option>
+                        </select>
+                        <button type="submit" class="form-button">Add Link</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <section id="materialsPage" class="content-section" style="display: none;">
+            <h2>Learning Resources</h2>
+            <div class="search-container">
+                <input type="text" id="searchInput" class="form-input" placeholder="Search for resources..." />
+            </div>
+            <div id="materialsDisplayGrid" class="materials-grid"></div> 
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>© <span id="currentYear"></span> IGACOS LR PORTAL. All Rights Reserved.</p>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getDatabase, ref, set, push, remove, onValue, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyArVK4JdqGYYMk2rlOLcwenCBzJIWOVYg8",
+            authDomain: "igacoslr.firebaseapp.com",
+            projectId: "igacoslr",
+            storageBucket: "igacoslr.appspot.com",
+            messagingSenderId: "168499425895",
+            appId: "1:168499425895:web:1e32d9d1c8f52887f0dac2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
+        const ADMIN_UID = 'ei66KvfdRjakTEycf2acPG3EQo73';
+        
+        const DOMElements = {
+            header: document.getElementById('header'),
+            currentYear: document.getElementById("currentYear"),
+            mainLogo: document.getElementById('mainLogo'),
+            logoutBtn: document.getElementById('logoutBtn'),
+            currentUserIdContainer: document.getElementById('currentUserIdContainer'), 
+            currentUserId: document.getElementById('currentUserId'),
+            landingPage: document.getElementById('landingPage'),
+            studentAuthSection: document.getElementById('studentAuthSection'),
+            adminAuthSection: document.getElementById('adminAuthSection'),
+            adminPanel: document.getElementById('adminPanel'),
+            materialsPage: document.getElementById('materialsPage'),
+            landingStudentBtn: document.getElementById('landingStudentBtn'),
+            landingAdminBtn: document.getElementById('landingAdminBtn'),
+            studentLoginForm: document.getElementById('studentLoginForm'),
+            adminLoginForm: document.getElementById('adminLoginForm'),
+            addLinkForm: document.getElementById('addLinkForm'),
+            searchInput: document.getElementById("searchInput"),
+            materialsDisplayGrid: document.getElementById('materialsDisplayGrid'), 
+        };
+
+        const AppState = {
+            isAdmin: false,
+            studentAccessGranted: sessionStorage.getItem('studentAccessGranted') === 'true',
+            allMaterials: [],
+        };
+
+        const renderAllMaterials = () => {
+            const isActuallyAdmin = AppState.isAdmin;
+            const searchTerm = DOMElements.searchInput.value.toLowerCase();
+
+            const materialsToRender = AppState.allMaterials.filter(material => {
+                if (!material || !material.description) return false; 
+                if (!searchTerm) return true; 
+                return material.description.toLowerCase().includes(searchTerm);
+            });
+
+            DOMElements.materialsDisplayGrid.innerHTML = '';
+
+            if (materialsToRender.length === 0) {
+                const message = searchTerm ? 'No materials found matching your search.' : 'No educational materials have been added yet.';
+                DOMElements.materialsDisplayGrid.innerHTML = `<p class="empty-state">${message}</p>`;
+                return;
+            }
+
+            for (const mat of materialsToRender) {
+                const card = document.createElement('div');
+                card.className = 'material-card';
+                card.innerHTML = `
+                    <a href="${mat.link}" target="_blank" class="material-title">${mat.description}</a>
+                    <div class="card-footer">
+                        <span class="grade-badge">Grade ${mat.gradeLevel ? mat.gradeLevel.replace('grade', '') : 'N/A'}</span>
+                        ${isActuallyAdmin ? `<button class="delete-link-btn" data-id="${mat.id}" title="Delete Material">
+                                <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>
+                            </button>` : ''}
+                    </div>
+                `;
+
+                if (isActuallyAdmin) {
+                    const deleteBtn = card.querySelector('.delete-link-btn');
+                    deleteBtn.addEventListener('click', () => {
+                        if(confirm('Are you sure you want to delete this link?')) {
+                            remove(ref(db, `educationalMaterials/${mat.id}`));
+                        }
+                    });
+                }
+                DOMElements.materialsDisplayGrid.appendChild(card);
+            }
+        };
+
+        const fetchEducationalMaterials = () => {
+            const materialsRef = ref(db, 'educationalMaterials');
+            onValue(materialsRef, (snapshot) => {
+                AppState.allMaterials = [];
+                if (snapshot.exists()) {
+                    snapshot.forEach(child => AppState.allMaterials.push({ id: child.key, ...child.val() }));
+                    AppState.allMaterials.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
+                }
+                renderAllMaterials(); 
+            });
+        };
+
+        const updateUI = () => {
+            const user = auth.currentUser;
+            AppState.isAdmin = user && user.uid === ADMIN_UID;
+            
+            const sections = [DOMElements.landingPage, DOMElements.studentAuthSection, DOMElements.adminAuthSection, DOMElements.adminPanel, DOMElements.materialsPage];
+            sections.forEach(el => el.style.display = 'none');
+            
+            DOMElements.header.style.display = 'none';
+
+            if (AppState.isAdmin) {
+                DOMElements.header.style.display = 'flex';
+                DOMElements.currentUserIdContainer.style.display = 'block'; 
+                DOMElements.currentUserId.textContent = user.email;
+                DOMElements.adminPanel.style.display = 'block';
+                DOMElements.materialsPage.style.display = 'block';
+                fetchEducationalMaterials();
+            } else if (AppState.studentAccessGranted) {
+                DOMElements.header.style.display = 'flex';
+                DOMElements.currentUserIdContainer.style.display = 'none'; 
+                DOMElements.materialsPage.style.display = 'block';
+                fetchEducationalMaterials();
+            } else {
+                DOMElements.landingPage.style.display = 'block';
+            }
+        };
+
+        DOMElements.mainLogo.addEventListener('click', () => location.reload());
+        DOMElements.searchInput.addEventListener("input", renderAllMaterials);
+        DOMElements.landingStudentBtn.addEventListener('click', () => {
+            DOMElements.landingPage.style.display = 'none';
+            DOMElements.studentAuthSection.style.display = 'block';
+        });
+
+        DOMElements.landingAdminBtn.addEventListener('click', () => {
+            DOMElements.landingPage.style.display = 'none';
+            DOMElements.adminAuthSection.style.display = 'block';
+        });
+
+        DOMElements.studentLoginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            sessionStorage.setItem('studentAccessGranted', 'true');
+            AppState.studentAccessGranted = true;
+            updateUI();
+        });
+
+        DOMElements.adminLoginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const emailInput = DOMElements.adminLoginForm.querySelector('#adminLoginEmail');
+            const passwordInput = DOMElements.adminLoginForm.querySelector('#adminLoginPassword');
+            signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value).catch(err => alert(err.message));
+        });
+
+        DOMElements.logoutBtn.addEventListener('click', () => {
+            if (AppState.isAdmin) signOut(auth);
+            sessionStorage.removeItem('studentAccessGranted');
+            AppState.studentAccessGranted = false;
+            updateUI();
+        });
+
+        DOMElements.addLinkForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const link = e.target.fileLink.value;
+            const description = e.target.linkDescription.value;
+            const gradeLevel = e.target.gradeLevel.value;
+
+            if (!link || !description || !gradeLevel) return alert('All fields are required.');
+
+            const newMaterialRef = push(ref(db, 'educationalMaterials'));
+            set(newMaterialRef, {
+                link, description, gradeLevel,
+                createdAt: serverTimestamp(),
+                addedBy: auth.currentUser.uid
+            }).then(() => {
+                e.target.reset();
+            }).catch(err => alert(err.message));
+        });
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                AppState.isAdmin = false;
+            }
+            updateUI();
+        });
+
+        DOMElements.currentYear.textContent = new Date().getFullYear();
+    </script>
+</body>
 </html>
